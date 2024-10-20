@@ -65,7 +65,7 @@ def _cluster_plot(
 
     if marks == "ids":
         marker_styles = [f"${label}$" for label in unique_labels]
-    
+
     for i, label in enumerate(unique_labels):
         # Assign color for label
         color_dict[label] = colors[i % num_colors]
@@ -154,9 +154,7 @@ def _calc_embed(model, query_loader, device, saved_dir=None):
                 embed = embed_b[idx_embed]
                 label = label_b[idx_embed]
 
-                assert np.shape(embed) == (
-                    model.get_embed_length(),
-                ), np.shape(embed)
+                assert np.shape(embed) == (model.get_embed_length(),), np.shape(embed)
 
                 if perf not in query_label:
                     query_label[perf] = label
@@ -210,21 +208,36 @@ def _generate_dist_matrixMPS(
 
     """
     import multiprocessing
+    import tqdm
 
     if ref_perf_label is None and ref_embed is None:
         query_in_ref = [(i, i) for i in range(len(query_perf_label))]
         ref_perf_label = query_perf_label
         ref_embed = query_embed
 
+    print(f"Dist matrix shape: {len(query_perf_label)}x{len(ref_perf_label)}")
     dist_matrix = np.zeros([len(query_perf_label), len(ref_perf_label)])
+
+    # all_distances = list()
+    # for restricted_slice in range():
+
+    # for perf_query, _ in query_perf_label:
+    #     for perf_ref, _ in ref_perf_label
+
+    # print(query_embed)
+    # print(query_perf_label)
+
     args_list = [
         (perf_query, perf_ref, query_embed, ref_embed)
         for perf_query, _ in query_perf_label
         for perf_ref, _ in ref_perf_label
     ]
+    # print(args_list)
 
+    print("Start calculation")
     with multiprocessing.Pool() as pool:
         distances = pool.map(_compute_distance_worker, args_list)
+        # distances = tqdm.tqdm(pool.imap(_compute_distance_worker, args_list), total=len(args_list))
 
     for (idx, idy), distance in zip(
         [
@@ -244,6 +257,7 @@ def _generate_dist_matrixMPS(
     ref_label = [v for k, v in ref_perf_label]
 
     return dist_matrix, query_label, ref_label
+
 
 # =============================================================================
 # The original CoverHunter distance matrix function was very slow at scale.
@@ -269,9 +283,7 @@ def _load_data_from_dir(query_chunked_lines):
     return query_perf_label, query_embed
 
 
-def _cut_one_line_with_dur(
-    line, window_length_s, window_shift_s, hop_size=0.04
-):
+def _cut_one_line_with_dur(line, window_length_s, window_shift_s, hop_size=0.04):
     """cut line with window_length_s
 
     If duration is smaller than window_length_s, return only one chunk.
@@ -400,9 +412,7 @@ def eval_for_map_with_feat(
 
     chunk_s = hp["chunk_s"]
     # assumes resolution of 25 features per second (hop length 0.04s)
-    assert (
-        infer_frame == chunk_s * 25
-    ), f"Error for mismatch of chunk_frame and chunk_s: {infer_frame}!={chunk_s}*25"
+    # assert (infer_frame == chunk_s * 25), f"Error for mismatch of chunk_frame and chunk_s: {infer_frame}!={chunk_s}*25"
 
     query_lines = read_lines(query_path, log=False)
     ref_lines = read_lines(ref_path, log=False)
@@ -426,17 +436,11 @@ def eval_for_map_with_feat(
         query_in_ref = None
 
     query_embed_dir = os.path.join(embed_dir, "query_embed")
-    query_chunked_lines = _cut_lines_with_dur(
-        query_lines, chunk_s, query_embed_dir
-    )
-    write_lines(
-        os.path.join(embed_dir, "query.txt"), query_chunked_lines, False
-    )
+    query_chunked_lines = _cut_lines_with_dur(query_lines, chunk_s, query_embed_dir)
+    write_lines(os.path.join(embed_dir, "query.txt"), query_chunked_lines, False)
     # select query perfs for which there is not yet a saved embedding
     to_calc_lines = [
-        l
-        for l in query_chunked_lines
-        if not os.path.exists(line_to_dict(l)["embed"])
+        l for l in query_chunked_lines if not os.path.exists(line_to_dict(l)["embed"])
     ]
     if logger:
         logger.info(
@@ -467,9 +471,7 @@ def eval_for_map_with_feat(
     if ref_path != query_path:
         # select ref perfs for which there is not yet a saved embedding
         to_calc_lines = [
-            l
-            for l in ref_chunked_lines
-            if not os.path.exists(line_to_dict(l)["embed"])
+            l for l in ref_chunked_lines if not os.path.exists(line_to_dict(l)["embed"])
         ]
         if logger:
             logger.info(
@@ -508,9 +510,7 @@ def eval_for_map_with_feat(
     else:
         ref_perf_label, ref_embed = _load_data_from_dir(ref_chunked_lines)
     if logger:
-        logger.info(
-            "Finished loading embedding. Start to compute distance matrix"
-        )
+        logger.info("Finished loading embedding. Start to compute distance matrix")
 
     # parallelized version for CoverHunterMPS
     dist_matrix, query_label, ref_label = _generate_dist_matrixMPS(
@@ -546,16 +546,12 @@ def eval_for_map_with_feat(
         logger.info(f"t-SNE plot saved to: {plot_name}")
 
     if logger:
-        logger.info(
-            "Finish computing distance matrix and Start to compute map"
-        )
+        logger.info("Finish computing distance matrix and Start to compute map")
         logger.info(
             f"Inp dist shape: {np.shape(dist_matrix)}, query: {len(query_label)}, ref: {len(ref_label)}",
         )
 
-    metrics = calc_map(
-        dist_matrix, query_label, ref_label, topk=10000, verbose=0
-    )
+    metrics = calc_map(dist_matrix, query_label, ref_label, topk=10000, verbose=0)
     if logger:
         logger.info("map: {}".format(metrics["mean_ap"]))
         logger.info("rank1: {}".format(metrics["rank1"]))

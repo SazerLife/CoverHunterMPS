@@ -1,15 +1,15 @@
 
 ### Training data paths
-train_path: "data/covers80/train.txt"
-val_path: "data/covers80/val.txt"
-test_path: "data/covers80/val.txt"
+train_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/train.txt"
+# val_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/val.txt"
+# test_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/val.txt"
 # test_path: "data/covers80/test.txt"
 
-### optional external test datasets used in the test phase of training epochs
-# covers80:
-#   query_path: "data/covers80_testset/full.txt"
-#   ref_path: "data/covers80_testset/full.txt"
-#   every_n_epoch_to_test: 1  # validate after every n epoch
+## optional external test datasets used in the test phase of training epochs
+covers80:
+  query_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/query.txt"
+  ref_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/ref.txt"
+  every_n_epoch_to_test: 1  # validate after every n epoch
 
 # Download the reels50easy dataset from https://www.irishtune.info/public/MLdata.htm
 # and then you can uncomment the next 4 lines.
@@ -42,12 +42,13 @@ every_n_epoch_to_save: 1  # save model after every n epoch
 ### Dataset parameters
 data_type: "cqt"  # raw or cqt or mel
 chunk_frame: [50]
-chunk_s: 50 # = chunk_frame[0] / 25 * mean_size
+chunk_s: 60 # = chunk_frame[0] / 25 * mean_size
 mode: "random"
-mean_size: 3
+mean_size: 1
 m_per_class: 8
 cqt:
-  hop_size: 0.04  # 1s has 25 frames
+  # hop_size: 0.04  # 1s has 25 frames
+  hop_size: 1.2     # 1s has 25 frames
 
 # spec_augmentation:
 #   random_erase:

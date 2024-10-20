@@ -193,7 +193,7 @@ class Trainer:
 
     def reset_learning_rate(self, new_lr=None):
         """
-        Utility to allow custom control of learning rate during training, 
+        Utility to allow custom control of learning rate during training,
         after loading a model from a checkpoint that would otherwise inherit
         the learning rate from the previous epoch via the checkpoint.
 
@@ -212,7 +212,7 @@ class Trainer:
         for param_group in self.optimizer.param_groups:
             param_group["lr"] = new_lr
         # Recreate the scheduler with the new learning rate
-        self.configure_scheduler()  
+        self.configure_scheduler()
 
     def save_model(self):
         """
@@ -291,13 +291,9 @@ class Trainer:
             logger=self.logger,
         )
         validation_loss = res["ce_loss"] / res["count"]
-        self.logger.info(
-            "count:%d, avg_ce_loss:%f", res["count"], validation_loss
-        )
+        self.logger.info("count:%d, avg_ce_loss:%f", res["count"], validation_loss)
 
-        self.logger.info(
-            "Time for %s is %.1fs\n", data_type, time.time() - start
-        )
+        self.logger.info("Time for %s is %.1fs\n", data_type, time.time() - start)
 
         if data_type == "val":
             if validation_loss < self.best_validation_loss:
@@ -321,15 +317,11 @@ class Trainer:
 
         for testset_name in valid_testlist:
             hp_test = self.hp[testset_name]
-            self.logger.info(
-                "Compute %s at epoch: %s", testset_name, self.epoch
-            )
+            self.logger.info("Compute %s at epoch: %s", testset_name, self.epoch)
 
             start = time.time()
             save_name = hp_test.get("save_name", testset_name)
-            embed_dir = os.path.join(
-                self.model_dir, f"embed_{self.epoch}_{save_name}"
-            )
+            embed_dir = os.path.join(self.model_dir, f"embed_{self.epoch}_{save_name}")
             query_in_ref_path = hp_test.get("query_in_ref_path", None)
             mean_ap, hit_rate, _ = eval_for_map_with_feat(
                 self.hp,
@@ -343,9 +335,7 @@ class Trainer:
                 logger=self.logger,
             )
 
-            self.summary_writer.add_scalar(
-                f"mAP/{testset_name}", mean_ap, self.epoch
-            )
+            self.summary_writer.add_scalar(f"mAP/{testset_name}", mean_ap, self.epoch)
             self.summary_writer.add_scalar(
                 f"hit_rate/{testset_name}", hit_rate, self.epoch
             )
@@ -401,17 +391,16 @@ def save_checkpoint(model, optimizer, step, epoch, checkpoint_dir) -> None:
     logging.info(f"save step:{step}, epoch:{epoch}")
 
 
-def load_checkpoint(
-    model, optimizer=None, checkpoint_dir=None, advanced=False
-):
+def load_checkpoint(model, optimizer=None, checkpoint_dir=None, advanced=False):
     state_dict_g = scan_and_load_checkpoint(checkpoint_dir, "g_")
     state_dict_do = scan_and_load_checkpoint(checkpoint_dir, "do_")
+    take_optimizer_from_chkp = True
+
     if state_dict_g:
+        logging.info(f"Sazer: g-model keys {state_dict_g.keys()}")
         if advanced:
             model_dict = model.state_dict()
-            valid_dict = {
-                k: v for k, v in state_dict_g.items() if k in model_dict
-            }
+            valid_dict = {k: v for k, v in state_dict_g.items() if k in model_dict}
             model_dict.update(valid_dict)
             model.load_state_dict(model_dict)
             for k in model_dict:
@@ -423,12 +412,16 @@ def load_checkpoint(
 
         logging.info(f"load g-model from {checkpoint_dir}")
 
-    if state_dict_do is None:
+    if state_dict_do is None or not take_optimizer_from_chkp:
         logging.info("using init value of steps and epoch")
         step, epoch = 1, -1
+        if not take_optimizer_from_chkp:
+            logging.warning("Sazer: optimizer hasn't loaded from do-model")
     else:
+        logging.info(f"Sazer: do-model keys {state_dict_do.keys()}")
         step, epoch = state_dict_do["steps"] + 1, state_dict_do["epoch"]
         logging.info(f"load d-model from {checkpoint_dir}")
+        # state_dict_do["optim_g"]["param_groups"][0]["initial_lr"] = 0.001
         optimizer.load_state_dict(state_dict_do["optim_g"])
 
     logging.info(f"step:{step}, epoch:{epoch}")

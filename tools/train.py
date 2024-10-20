@@ -68,6 +68,8 @@ def _main() -> None:
                 )
                 sys.exit()
             device = torch.device("cuda")
+        case "cpu":
+            device = torch.device("cpu")
         case _:
             logger.error(
                 "You set device: %s"

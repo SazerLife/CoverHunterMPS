@@ -1,15 +1,15 @@
 
 ### Training data paths
-train_path: "data/covers80/train.txt"
-val_path: "data/covers80/val.txt"
-test_path: "data/covers80/val.txt"
+train_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/train.txt"
+# val_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/val.txt"
+# test_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/val.txt"
 # test_path: "data/covers80/test.txt"
 
-### optional external test datasets used in the test phase of training epochs
-# covers80:
-#   query_path: "data/covers80_testset/full.txt"
-#   ref_path: "data/covers80_testset/full.txt"
-#   every_n_epoch_to_test: 1  # validate after every n epoch
+## optional external test datasets used in the test phase of training epochs
+covers80:
+  query_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/query.txt"
+  ref_path: "/mnt/yandex_cup24/CoverHunterMPS_data/covers80/ref.txt"
+  every_n_epoch_to_test: 1  # validate after every n epoch
 
 # Download the reels50easy dataset from https://www.irishtune.info/public/MLdata.htm
 # and then you can uncomment the next 4 lines.
@@ -42,22 +42,23 @@ every_n_epoch_to_save: 1  # save model after every n epoch
 ### Dataset parameters
 data_type: "cqt"  # raw or cqt or mel
 chunk_frame: [50]
-chunk_s: 50 # = chunk_frame[0] / 25 * mean_size
+chunk_s: 60 # = chunk_frame[0] / 25 * mean_size
 mode: "random"
-mean_size: 3
+mean_size: 1
 m_per_class: 8
 cqt:
-  hop_size: 0.04  # 1s has 25 frames
+  # hop_size: 0.04  # 1s has 25 frames
+  hop_size: 1.2     # 1s has 25 frames
 
-# spec_augmentation:
-#   random_erase:
-#     prob: 0.5
-#     erase_num: 4
-#     region_size: [.25, .1] # w, h as fraction of feature array size
-#   roll_pitch:
-#     prob: 0.5
-#     shift_num: 12
-#     method: "default" # "default" "low_melody" or "flex_melody"
+spec_augmentation:
+  # random_erase:
+  #   prob: 0.5
+  #   erase_num: 4
+  #   region_size: [.25, .1] # w, h as fraction of feature array size
+  roll_pitch:
+    prob: 0.25
+    shift_num: 1
+    method: "default" # "default" "low_melody" or "flex_melody"
 
 ### Training parameters
 device: 'cuda' # 'mps' or 'cuda' 
@@ -68,7 +69,7 @@ batch_size: 256  # 256. CoverHunter repo started with 16, but that is too small.
 learning_rate: 0.001
 adam_b1: 0.8
 adam_b2: 0.99
-lr_decay: 0.9  # CoverHunter used 0.9975 but that's for very large datasets
+lr_decay: 0.95  # CoverHunter used 0.9975 but that's for very large datasets
 min_lr: 0.0001
 warmup: False
 warmup_steps: 20000
@@ -92,7 +93,7 @@ ce:  # cross-entropy
 
 triplet:
   margin: 0.3
-  weight: 0.1
+  weight: 0.2
 
 center:
   weight: 0.0

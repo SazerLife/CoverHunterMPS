@@ -14,15 +14,38 @@ from src.model import Model
 from src.utils import load_hparams, read_lines, write_lines
 
 LOGGER = logging.getLogger(__name__)
-EVAL_DIR = Path("training/exp2")
+EVAL_DIR = Path("training/exp3")
+
+{
+    "training/exp2/": {
+        "checkpoints/g_00000359": {
+            "rranks": 0.5635675196647386,
+            "mAP": 0.2712094629849707,
+        },
+        "checkpoints/g_00000381": {
+            "rranks": 0.5639672545611649,
+            "mAP": 0.2707566079560851,
+        },
+        "aver_checkpoints/aver_g-295_298_300_304_313_322_329_334_337_347_355_363_368_298_304_332_337_347_356_363_368_380": {
+            "rranks": 0.5712707204977174,
+            "mAP": 0.2760716027649133,
+        },
+    },
+    "training/exp3/": {
+        "checkpoints/g_00000844": {
+            "rranks": 0.5943551346718862,
+            "mAP": 0.28666194649999815,
+        }
+    },
+}
 
 
 def main():
     device = "cuda"
     hp_path = "config/hparams.yaml"
-    # cp_path = "aver_checkpoints/aver_g-194_196_220_240_244_246_252_257_265_271_276_283_194_196_220_244_257_265_271_276_283"
+    # cp_path = "aver_checkpoints/aver_g-295_298_300_304_313_322_329_334_337_347_355_363_368_298_304_332_337_347_356_363_368_380"
     # cp_path = "checkpoints/g_00000320"
-    cp_path = "checkpoints/g_00000329"
+    cp_path = "checkpoints/g_00000844"
 
     version2clique = None
     # version2clique = load_version2clique()

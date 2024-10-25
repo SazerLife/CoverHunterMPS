@@ -14,7 +14,7 @@ from src.model import Model
 from src.utils import load_hparams, read_lines, write_lines
 
 LOGGER = logging.getLogger(__name__)
-EVAL_DIR = Path("training/exp3")
+EVAL_DIR = Path("training/exp5")
 
 {
     "training/exp2/": {
@@ -35,7 +35,31 @@ EVAL_DIR = Path("training/exp3")
         "checkpoints/g_00000844": {
             "rranks": 0.5943551346718862,
             "mAP": 0.28666194649999815,
-        }
+        },
+        "aver_checkpoints/aver_g-508_536_554_599_617_643_667_681_745_766_832_845_508_554_588_599_617_681_745_832_845": {
+            "rranks": 0.5970237744671043,
+            "mAP": 0.2977531806381228,
+        },
+    },
+    "training/exp4/": {
+        "checkpoints/g_00000147": {
+            "rranks": 0.5857654604067418,
+            "mAP": 0.2932351803487232,
+        },
+        "aver_checkpoints/aver_g-20_25_31_20_25_28": {
+            "rranks": 0.6284825086127235,
+            "mAP": 0.31904239974687604,
+        },
+    },
+    "training/exp5/": {
+        "checkpoints/g_00000068": {
+            "rranks": 0.6572507548901262,
+            "mAP": 0.3452827979296185,
+        },
+        "aver_checkpoints/aver_g-53_59_65_67_68_59_62_65_68": {
+            "rranks": 0.6609223754462198,
+            "mAP": 0.34687882992287294,
+        },
     },
 }
 
@@ -43,9 +67,8 @@ EVAL_DIR = Path("training/exp3")
 def main():
     device = "cuda"
     hp_path = "config/hparams.yaml"
-    # cp_path = "aver_checkpoints/aver_g-295_298_300_304_313_322_329_334_337_347_355_363_368_298_304_332_337_347_356_363_368_380"
-    # cp_path = "checkpoints/g_00000320"
-    cp_path = "checkpoints/g_00000844"
+    # cp_path = "aver_checkpoints/aver_g-20_25_31_20_25_28"
+    cp_path = "aver_checkpoints/aver_g-53_59_65_67_68_59_62_65_68"
 
     version2clique = None
     # version2clique = load_version2clique()

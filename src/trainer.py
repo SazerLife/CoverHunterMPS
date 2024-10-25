@@ -394,7 +394,7 @@ def save_checkpoint(model, optimizer, step, epoch, checkpoint_dir) -> None:
 def load_checkpoint(model, optimizer=None, checkpoint_dir=None, advanced=False):
     state_dict_g = scan_and_load_checkpoint(checkpoint_dir, "g_")
     state_dict_do = scan_and_load_checkpoint(checkpoint_dir, "do_")
-    take_optimizer_from_chkp = True
+    take_optimizer_from_chkp = False
 
     if state_dict_g:
         logging.info(f"Sazer: g-model keys {state_dict_g.keys()}")

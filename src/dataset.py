@@ -14,9 +14,7 @@ from torch.utils.data.sampler import Sampler
 from src.cqt import shorter
 from src.utils import line_to_dict, read_lines
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s"
-)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s")
 
 random.seed(1)
 
@@ -38,12 +36,8 @@ class SignalAug:
     def __init__(self, hp) -> None:
         self._hp = hp
         if "add_noise" in self._hp:
-            self._noise_path_lst = read_lines(
-                hp["add_noise"]["noise_path"], log=False
-            )
-            logging.info(
-                "Noise Data path:{}".format(hp["add_noise"]["noise_path"])
-            )
+            self._noise_path_lst = read_lines(hp["add_noise"]["noise_path"], log=False)
+            logging.info("Noise Data path:{}".format(hp["add_noise"]["noise_path"]))
             logging.info(f"Noise Data items:{len(self._noise_path_lst)}")
         else:
             self._noise_path_lst = None
@@ -137,9 +131,7 @@ class SignalAug:
 
         status = process_handle.returncode
         if status > 0:
-            logging.info(
-                "status:{}, err:{}".format(status, err.decode("utf-8"))
-            )
+            logging.info("status:{}, err:{}".format(status, err.decode("utf-8")))
 
         return out
 
@@ -190,9 +182,7 @@ class SignalAug:
 
         status = process_handle.returncode
         if status > 0:
-            logging.info(
-                "status:{}, err:{}".format(status, err.decode("utf-8"))
-            )
+            logging.info("status:{}, err:{}".format(status, err.decode("utf-8")))
         signal = out
         return signal
 
@@ -272,12 +262,8 @@ class SignalAug:
         if "add_noise" in self._hp and self._hp["add_noise"]["prob"] > 0.01:
             hp_noise = self._hp["add_noise"]
             noise_data = line_to_dict(random.choice(self._noise_path_lst))
-            noise_sig_init, _ = librosa.load(
-                noise_data["wav"], sr=hp_noise["sr"]
-            )
-            noise_signal = noise_sig_init[
-                random.randint(0, len(noise_sig_init)) :
-            ]
+            noise_sig_init, _ = librosa.load(noise_data["wav"], sr=hp_noise["sr"])
+            noise_signal = noise_sig_init[random.randint(0, len(noise_sig_init)) :]
             while len(noise_signal) < len(signal):
                 noise_signal = np.concatenate([noise_signal, noise_sig_init])
 
@@ -346,7 +332,7 @@ class SpecAug:
         """
         This original CoverHunter method - improved here for efficiency - wraps
         the spectrogram around, copying overflow content to the bottom or top
-        of the pitch dimension. 
+        of the pitch dimension.
 
         Args:
         feat (np.array): The input spectrogram of shape (time_steps, frequency_bins).
@@ -394,7 +380,7 @@ class SpecAug:
         """
         Alternative to _shift_melody_low() method, better for strongly
         melodic music that only sometimes appears at the bottom or top of the
-        CQT frequency range. However, if loud non-melodic content is present 
+        CQT frequency range. However, if loud non-melodic content is present
         then this method will be less reliable.
 
         Detect the tonal center by dominant amplitude, and use that to shift
@@ -414,9 +400,7 @@ class SpecAug:
         time_steps, freq_bins = np.shape(feat)
 
         # Estimate the tonal center
-        loudness_threshold = np.percentile(
-            feat, 90
-        )  # Consider top 10% as "loud"
+        loudness_threshold = np.percentile(feat, 90)  # Consider top 10% as "loud"
         loud_bins = np.where(feat > loudness_threshold)
         if len(loud_bins[1]) > 0:  # index 1 is frequency dimension
             tonal_center = int(np.mean(loud_bins[1]))
@@ -441,9 +425,7 @@ class SpecAug:
         return feat
 
     @staticmethod
-    def _random_erase(
-        feat, region_num=4, region_size=(0.25, 0.1), region_val=-128
-    ):
+    def _random_erase(feat, region_num=4, region_size=(0.25, 0.1), region_val=-128):
         """
         - region_size(width, height) in percentage of feat size
         - region_val = new value of erased region, where 0 is max loud
@@ -483,7 +465,7 @@ class SpecAug:
             if p <= self._hp["random_erase"]["prob"]:
                 feat = self._random_erase(
                     feat,
-                    region_val=random.random() * (-128),
+                    region_val=random.random() * (-50),  # (-128),
                     region_num=self._hp["random_erase"]["erase_num"],
                     region_size=self._hp["random_erase"]["region_size"],
                 )
@@ -617,9 +599,7 @@ class MPerClassSampler(Sampler):
       to make sure every ranks has not override data.
     """
 
-    def __init__(
-        self, data_path, m, batch_size, distribute=False, logger=None
-    ) -> None:
+    def __init__(self, data_path, m, batch_size, distribute=False, logger=None) -> None:
         data_lines = read_lines(data_path, log=False)
 
         self._m_per_class = m
@@ -649,9 +629,7 @@ class MPerClassSampler(Sampler):
         num_iters = self.num_iters()
         for _ in range(num_iters):
             random.shuffle(self.labels)
-            curr_label_set = self.labels[
-                : self._batch_size // self._m_per_class
-            ]
+            curr_label_set = self.labels[: self._batch_size // self._m_per_class]
             for label in curr_label_set:
                 t = self._labels_to_indices[label].copy()
                 random.shuffle(t)
@@ -663,9 +641,7 @@ class MPerClassSampler(Sampler):
         return self._sample_length // self._batch_size
 
     def _get_sample_length(self):
-        sample_length = sum(
-            [len(self._labels_to_indices[k]) for k in self.labels]
-        )
+        sample_length = sum([len(self._labels_to_indices[k]) for k in self.labels])
         sample_length -= sample_length % self._batch_size
         return sample_length
 

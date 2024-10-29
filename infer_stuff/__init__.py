@@ -21,8 +21,9 @@ def test_procedure(
     print(len(embeddings))
 
     predictions = []
+    # for chunk_result in pairwise_distances_chunked(embeddings, metric="cosine", reduce_func=reduce_func, working_memory=1000):
     for chunk_result in pairwise_distances_chunked(
-        embeddings, metric="cosine", reduce_func=reduce_func, working_memory=1000
+        embeddings, metric="euclidean", reduce_func=reduce_func, working_memory=1000
     ):
         for query_indx, query_nearest_items in chunk_result:
             predictions.append(
@@ -73,7 +74,8 @@ def validation_epoch_end(
 def calculate_ranking_metrics(
     embeddings: np.ndarray, cliques: List[int]
 ) -> Tuple[np.ndarray, np.ndarray]:
-    distances = pairwise_distances(embeddings, metric="cosine")
+    # distances = pairwise_distances(embeddings, metric="cosine")
+    distances = pairwise_distances(embeddings, metric="l2")
     s_distances = np.argsort(distances, axis=1)
     cliques = np.array(cliques)
     query_cliques = cliques[s_distances[:, 0]]

@@ -8,11 +8,13 @@ import time
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from lion_pytorch import Lion
+
 
 from src.dataset import AudioFeatDataset, MPerClassSampler
 from src.eval_testset import eval_for_map_with_feat
 from src.pytorch_utils import get_lr, scan_and_load_checkpoint
-from src.scheduler import UserDefineExponentialLR
+from src.scheduler import UserDefineExponentialLR, CosineAnnealingWarmupRestarts
 
 # setting this to False in Apple Silicon context showed negligible impact.
 torch.backends.cudnn.benchmark = True
@@ -166,17 +168,32 @@ class Trainer:
         self.optimizer = torch.optim.AdamW(
             self.model.parameters(),
             self.hp["learning_rate"],
+            weight_decay=self.hp["weight_decay"],
             betas=[self.hp["adam_b1"], self.hp["adam_b2"]],
         )
+        # self.optimizer = Lion(
+        #     self.model.parameters(),
+        #     self.hp["learning_rate"],
+        #     weight_decay=0.01,
+        #     betas=[self.hp["adam_b1"], self.hp["adam_b2"]],
+        # )
 
     def configure_scheduler(self):
         """
         Configure the model scheduler.
         """
-        self.scheduler = UserDefineExponentialLR(
+        # self.scheduler = UserDefineExponentialLR(
+        #     self.optimizer,
+        #     gamma=self.hp["lr_decay"],
+        #     min_lr=self.hp["min_lr"],
+        #     last_epoch=self.epoch,
+        # )
+        self.scheduler = CosineAnnealingWarmupRestarts(
             self.optimizer,
-            gamma=self.hp["lr_decay"],
+            self.hp["first_cycle_steps"],
+            max_lr=self.hp["learning_rate"],
             min_lr=self.hp["min_lr"],
+            gamma=self.hp["lr_decay"],
             last_epoch=self.epoch,
         )
 
@@ -394,7 +411,7 @@ def save_checkpoint(model, optimizer, step, epoch, checkpoint_dir) -> None:
 def load_checkpoint(model, optimizer=None, checkpoint_dir=None, advanced=False):
     state_dict_g = scan_and_load_checkpoint(checkpoint_dir, "g_")
     state_dict_do = scan_and_load_checkpoint(checkpoint_dir, "do_")
-    take_optimizer_from_chkp = False
+    take_optimizer_from_chkp = True
 
     if state_dict_g:
         logging.info(f"Sazer: g-model keys {state_dict_g.keys()}")
@@ -421,7 +438,6 @@ def load_checkpoint(model, optimizer=None, checkpoint_dir=None, advanced=False):
         logging.info(f"Sazer: do-model keys {state_dict_do.keys()}")
         step, epoch = state_dict_do["steps"] + 1, state_dict_do["epoch"]
         logging.info(f"load d-model from {checkpoint_dir}")
-        # state_dict_do["optim_g"]["param_groups"][0]["initial_lr"] = 0.001
         optimizer.load_state_dict(state_dict_do["optim_g"])
 
     logging.info(f"step:{step}, epoch:{epoch}")
@@ -447,8 +463,8 @@ def train_one_epoch(
         random.shuffle(idx_loader)
         for idx in idx_loader:
             batch = list(batch_lst)[idx]
-            if step % 1000 == 0:
-                scheduler.step()
+            # if step % 1000 == 0:
+            scheduler.step()
             model.train()
             _, feat, label = batch
             feat = batch[1].float().to(device)

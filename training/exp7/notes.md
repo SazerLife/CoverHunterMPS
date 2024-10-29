@@ -1,0 +1,6 @@
+2024-10-29 02:16:10,269 INFO Compute covers80 at epoch: 1
+2024-10-29 02:16:20,395 INFO Finish computing distance matrix and Start to compute map
+2024-10-29 02:16:20,395 INFO Inp dist shape: (2081, 2081), query: 2081, ref: 2081
+2024-10-29 02:16:22,698 INFO map: 0.5066497409480549
+2024-10-29 02:16:22,698 INFO rank1: 166.0855358000961
+2024-10-29 02:16:22,698 INFO hit_rate: 0.4315233061028352

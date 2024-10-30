@@ -207,6 +207,7 @@ class Model(torch.nn.Module):
             output_size=hp["encoder"]["output_dims"],
             linear_units=hp["encoder"]["attention_dim"],
             num_blocks=hp["encoder"]["num_blocks"],
+            input_layer=hp["encoder"]["input_layer"]
         )
 
         # Unused

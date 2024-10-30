@@ -14,7 +14,7 @@ from src.model import Model
 from src.utils import load_hparams, read_lines, write_lines
 
 LOGGER = logging.getLogger(__name__)
-EVAL_DIR = Path("training/exp5")
+EVAL_DIR = Path("training/exp8")
 
 {
     "training/exp2/": {
@@ -61,6 +61,54 @@ EVAL_DIR = Path("training/exp5")
             "mAP": 0.34687882992287294,
         },
     },
+    "training/exp6/": {
+        "aver_checkpoints/aver_g-56_65_77_65_77_94": {
+            "cosin": {
+                "rranks": 0.6690447018471737,
+                "mAP": 0.35702033009676626,
+            },
+            "euclidean": {
+                "rranks": 0.6688983273321215,
+                "mAP": 0.3593995205196027,
+            },
+            "l2": {
+                "rranks": 0.6688983273321215,
+                "mAP": 0.3593995205196027,
+            },
+            "cityblock": {
+                "rranks": 0.6620381325851775,
+                "mAP": 0.3462932329056158,
+            },
+            "l1": {
+                "rranks": 0.6620381325851775,
+                "mAP": 0.3462932329056158,
+            },
+            "manhattan": {
+                "rranks": 0.6620381325851775,
+                "mAP": 0.3462932329056158,
+            },
+        },
+    },
+    "training/exp7/": {
+        "checkpoints/g_00000001": {
+            "rranks": 0.6695665384617365,
+            "mAP": 0.36923216605733294,
+        },
+    },
+    "training/exp8/": {
+        "checkpoints/g_00000237": {
+            "rranks": 0.7186598306985081,
+            "mAP": 0.4021911709342964,
+        },
+        "checkpoints/g_00000238": {
+            "rranks": 0.7186891710143936,
+            "mAP": 0.40239440002585897,
+        },
+        "aver_checkpoints/aver_g-164_182_201_219_237_164_183_201_219_237": {
+            "rranks": 0.7159825631849236,
+            "mAP": 0.39992498028895757,
+        },
+    },
 }
 
 
@@ -68,7 +116,7 @@ def main():
     device = "cuda"
     hp_path = "config/hparams.yaml"
     # cp_path = "aver_checkpoints/aver_g-20_25_31_20_25_28"
-    cp_path = "aver_checkpoints/aver_g-53_59_65_67_68_59_62_65_68"
+    cp_path = "checkpoints/g_00000238"
 
     version2clique = None
     # version2clique = load_version2clique()

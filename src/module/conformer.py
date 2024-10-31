@@ -1203,10 +1203,14 @@ class ConformerEncoder(torch.nn.Module):
 
         if input_layer == "linear":
             subsampling_class = LinearNoSubsampling
+        # elif input_layer == "linear_timedomain":
+        #     subsampling_class = LinearNoSubsamplingTimeDomain
         elif input_layer == "conv2d":
             subsampling_class = Conv2dSubsampling4
         elif input_layer == "conv2d8":
             subsampling_class = Conv2dSubsampling8
+        # elif input_layer == "convtranspose2d4":
+        #     subsampling_class = Conv2dUpsampling4
         else:
             raise ValueError("unknown input_layer: " + input_layer)
         logging.info(f"Input layers - {input_layer}")

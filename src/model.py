@@ -267,12 +267,12 @@ class Model(torch.nn.Module):
             model_path = get_model_with_epoch(model_dir, "g_", epoch_num)
             assert model_path, f"Error:model with epoch {epoch_num} not found"
 
-        state_dict_g = torch.load(model_path, map_location=device,weights_only=False)["generator"]
+        state_dict_g = torch.load(model_path, map_location=device, weights_only=False)[
+            "generator"
+        ]
         if advanced:
             model_dict = self.state_dict()
-            valid_dict = {
-                k: v for k, v in state_dict_g.items() if k in model_dict
-            }
+            valid_dict = {k: v for k, v in state_dict_g.items() if k in model_dict}
             model_dict.update(valid_dict)
             self.load_state_dict(model_dict)
             for k in model_dict:
@@ -284,9 +284,7 @@ class Model(torch.nn.Module):
         self.eval()
         self._epoch = epoch_num
         logging.info(
-            "Successful init model with epoch-%d, device:%s\n",
-            self._epoch,
-            device
+            "Successful init model with epoch-%d, device:%s\n", self._epoch, device
         )
         return self._epoch
 
@@ -313,6 +311,9 @@ class Model(torch.nn.Module):
         # for mps debugging only
         # confirmed float32 as of 2/10/2024 during train
         # but not during val
+
+        if self._hp["encoder"]["is_timedomain"]:
+            x = x.transpose(1, 2)
 
         x = self._global_cmvn(x.transpose(1, 2)).transpose(1, 2)
         xs_lens = (
